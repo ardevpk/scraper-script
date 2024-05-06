@@ -90,12 +90,11 @@ class CustomScraper(Script):
                 continue
         return jobs
 
-    def us_main_code(self, runner):
-        driver = self.get_options()
+    def us_main_code(self, runner, driver):
+        # driver = self.get_driver()
 
         for location in self.locations:
             location = location.replace(" ", "+")
-            print(self.keywords)
             for keyword in self.keywords:
                 keyword = keyword.replace(" ", '+')
                 try:
@@ -105,12 +104,12 @@ class CustomScraper(Script):
                     while pg < end:
                         pg += 1
                         url = self.job_portal.format(keyword, location)
-                        print(url)
+                        print("URL:", url)
 
-                        driver.get(url)
-                        driver.implicitly_wait(10)
+                        driver.goto(url)
+                        # driver.implicitly_wait(10)
                         time.sleep(3)
-                        soup = BeautifulSoup(driver.page_source, "html.parser")
+                        soup = BeautifulSoup(driver.content(), "html.parser")
                         try:
                             job_collection = soup.findAll(
                                 "div", {"class": "flex flex-col gap-24 md:gap-36"})
@@ -122,15 +121,15 @@ class CustomScraper(Script):
                         except Exception as exc:
                             print("Error in Get JOB Function", exc)
                             break
-                except:
-                    print("Error in Url")
+                except Exception as exc:
+                    print("Error in Url", exc)
                     continue
-        driver.quit()
+        driver.close()
 
-    def run(self, runner):
+    def run(self, runner, page):
         try:
-            self.us_main_code(runner=runner)
+            self.us_main_code(runner=runner, driver=page)
         except Exception as exc:
             print('Zip Recruiter Exception:', exc)
 
-CustomScraper().run(runner=None)
+CustomScraper().get_driver()
