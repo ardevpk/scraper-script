@@ -1,6 +1,8 @@
 import os
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+import chromedriver_binary  # Adds chromedriver binary to path
+
 
 # Set up Chrome options
 chrome_options = webdriver.ChromeOptions()
