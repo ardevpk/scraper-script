@@ -1,12 +1,15 @@
+import os
 from selenium import webdriver
-from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
 
 # Set up Chrome options
 chrome_options = webdriver.ChromeOptions()
 chrome_options.add_argument("--headless")  # Run Chrome in headless mode (no GUI)
 
 # Initialize Chrome driver with specified binary path
-driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options, executable_path='./scraper/chromedrivers/chromedriver')
+
+service = Service(os.path.join(os.getcwd(), './scraper/chromedrivers/chromedriver111'))
+driver = webdriver.Chrome(options=chrome_options, service=service)
 
 # Example usage: Open Google and get title
 driver.get("https://www.google.com")
