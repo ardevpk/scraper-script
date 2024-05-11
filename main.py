@@ -109,6 +109,7 @@ class CustomScraper(Script):
                         driver.goto(url)
                         # driver.implicitly_wait(10)
                         time.sleep(3)
+                        print(driver.content())
                         soup = BeautifulSoup(driver.content(), "html.parser")
                         try:
                             job_collection = soup.findAll(
