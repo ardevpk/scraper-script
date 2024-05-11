@@ -23,7 +23,7 @@ if not os.path.exists(chromedriver_path):
     latest_release = open("LATEST_RELEASE").read().strip()
     os.system(f"curl -O https://chromedriver.storage.googleapis.com/{latest_release}/chromedriver_linux64.zip")
     os.system("unzip chromedriver_linux64.zip")
-    os.system(f"mv chromedriver /usr/local/bin/")
+    os.system(f"mv chromedriver {chromedriver_path}")
     os.system("rm chromedriver_linux64.zip LATEST_RELEASE")
 
 # Set up the Chrome WebDriver service
