@@ -6,8 +6,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    context = {'values': scrape_dummy_data()}
-    return render_template('index.html', context={'context': context})
+    return render_template('index.html', context=scrape_dummy_data())
 
 
 
