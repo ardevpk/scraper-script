@@ -121,7 +121,9 @@ class Script:
         print('Save called!')
         jobs = self._validate_unique_jobs(jobs=jobs)
         try:
-            print('JOBS:', jobs)
+            print('\nJOBS:')
+            from pprint import pprint
+            pprint(jobs)
             """
             Here jobs will be saved in DB! With bulk DB operation!
             """

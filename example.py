@@ -13,7 +13,6 @@ class CustomScraper(Script):
         self.base_url = "https://www.ziprecruiter.com"
         self.job_portal = "https://www.ziprecruiter.com/candidate/search?radius=5000&days=5&search={}&location={}"
         self.locations = ['Pennsylvania', 'Florida', 'Georgia', 'Texas']
-        # self.keywords = ['Python', 'Django', 'Flask', 'FastAPI']
 
     def _get_jobs(self, job_collection):
         jobs = []
@@ -87,11 +86,11 @@ class CustomScraper(Script):
                 }
                 jobs.append(current_item)
             except Exception as exc:
-                print("Error in HTML Code", exc)
-                continue
+                print("Error in HTML Code:", str(exc))
+                self.add_logs(desc=f'Error in HTML Code: {str(exc)}')
         return jobs
 
-    def us_main_code(self, runner):
+    def us_main_code(self):
         driver = self.get_options()
 
         for location in self.locations:
@@ -109,94 +108,33 @@ class CustomScraper(Script):
 
                         driver.get(url)
                         driver.implicitly_wait(10)
-                        time.sleep(3)
-                        
-                        # from selenium.webdriver.common.by import By
-                        # from selenium.webdriver.support.ui import WebDriverWait
-                        # from selenium.webdriver.support import expected_conditions as EC
-
-                        # def check_cloudflare_and_solve(driver):
-                        #     try:
-                        #         # Wait for Cloudflare challenge to be visible
-                        #         for wait in range(5, 20, 5):
-                        #             print('Cloudflare wait:', wait)
-                        #             cloudflare_challenge = WebDriverWait(driver, 10).until(
-                        #                 EC.presence_of_element_located((By.ID, "cf-challenge-running"))
-                        #             )
-                        #             if cloudflare_challenge:
-                        #                 print("Cloudflare challenge detected, waiting for it to complete...")
-                        #                 time.sleep(wait)  # Adjust sleep time as necessary for the challenge to complete
-                        #                 return True
-                        #             return False
-                        #     except Exception as exc:
-                        #         print("No Cloudflare challenge detected:", str(exc))
-                        #         return False
-
-                        # def wait_for_class(driver, class_name):
-                        #     try:
-                        #         element = WebDriverWait(driver, 10).until(
-                        #             EC.presence_of_element_located((By.CLASS_NAME, class_name))
-                        #         )
-                        #         return element
-                        #     except:
-                        #         return None
-
-                        # desired_class = 'job_result_wrapper'
-                        # element = wait_for_class(driver, desired_class)
-                        # # If the class is not present, check for Cloudflare challenge
-                        # if not element:
-                        #     cloudflare_solved = check_cloudflare_and_solve(driver)
-                        #     if cloudflare_solved:
-                        #         # After waiting for Cloudflare challenge, check for the desired class again
-                        #         element = wait_for_class(driver, desired_class)
-                        #         # time.sleep(10)
-
-
-                        from selenium.webdriver.common.by import By
-                        from selenium.webdriver.support.ui import WebDriverWait
-                        from selenium.webdriver.support import expected_conditions as EC
-
-                        desired_class = 'job_result_wrapper'
-                        element = WebDriverWait(driver, 10).until(
-                                EC.presence_of_element_located((By.CLASS_NAME, desired_class))
-                            )
-                        cloudflare_challenge = WebDriverWait(driver, 10).until(
-                                EC.presence_of_element_located((By.ID, "cf-challenge-running"))
-                            )
-                        if cloudflare_challenge:
-                            time.sleep(10)
-                        element = WebDriverWait(driver, 10).until(
-                                EC.presence_of_element_located((By.CLASS_NAME, desired_class))
-                            )
+                        time.sleep(5)
                         soup = BeautifulSoup(driver.page_source, "html.parser")
                         try:
                             job_collection = soup.findAll("div", {"class": "job_result_wrapper"})
-                            # job_collection = soup.findAll("div", {"class": "mb-12 flex flex-col gap-12"})
                             if len(job_collection) != 0:
                                 jobs = self._get_jobs(job_collection)
-                                self.save(runner=runner, jobs=jobs)
+                                self.save(jobs=jobs)
                             else:
-                                driver.save_screenshot('./screenshot.png')
-                                print('Screenshot Saved!')
+                                self.save_image_in_db(png_bytes=driver.get_screenshot_as_png())
                                 break
                         except Exception as exc:
-                            print("Error in Get JOB Function", exc)
+                            print("Error at Get JOB Function:", str(exc))
+                            self.add_logs(desc=f'Error at Get JOB Function:{url}: {str(exc)}')
                             break
-                    # else:
-                    #     print('Cloudflare challeng failed!')
-                except Exception as exc:
-                    print("Error in Url:", exc)
+                except Exception as exe:
+                    print("Error in loop:", str(exe))
+                    self.add_logs(desc=f'Error in loop: {str(exe)}')
                     continue
         driver.quit()
 
-    def run(self, runner):
+    def run(self):
         try:
-            self.us_main_code(runner=runner)
+            self.us_main_code()
         except Exception as exc:
             print('Zip Recruiter Exception:', exc)
 
 
-
-if __name__ == "__main__":
-    scraper = CustomScraper()
-    scraper.run(runner=0.1)
+if __name__ == '__main__':
+    script = CustomScraper()
+    script.run()
