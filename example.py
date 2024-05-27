@@ -111,64 +111,81 @@ class CustomScraper(Script):
                         driver.implicitly_wait(10)
                         time.sleep(3)
                         
+                        # from selenium.webdriver.common.by import By
+                        # from selenium.webdriver.support.ui import WebDriverWait
+                        # from selenium.webdriver.support import expected_conditions as EC
+
+                        # def check_cloudflare_and_solve(driver):
+                        #     try:
+                        #         # Wait for Cloudflare challenge to be visible
+                        #         for wait in range(5, 20, 5):
+                        #             print('Cloudflare wait:', wait)
+                        #             cloudflare_challenge = WebDriverWait(driver, 10).until(
+                        #                 EC.presence_of_element_located((By.ID, "cf-challenge-running"))
+                        #             )
+                        #             if cloudflare_challenge:
+                        #                 print("Cloudflare challenge detected, waiting for it to complete...")
+                        #                 time.sleep(wait)  # Adjust sleep time as necessary for the challenge to complete
+                        #                 return True
+                        #             return False
+                        #     except Exception as exc:
+                        #         print("No Cloudflare challenge detected:", str(exc))
+                        #         return False
+
+                        # def wait_for_class(driver, class_name):
+                        #     try:
+                        #         element = WebDriverWait(driver, 10).until(
+                        #             EC.presence_of_element_located((By.CLASS_NAME, class_name))
+                        #         )
+                        #         return element
+                        #     except:
+                        #         return None
+
+                        # desired_class = 'job_result_wrapper'
+                        # element = wait_for_class(driver, desired_class)
+                        # # If the class is not present, check for Cloudflare challenge
+                        # if not element:
+                        #     cloudflare_solved = check_cloudflare_and_solve(driver)
+                        #     if cloudflare_solved:
+                        #         # After waiting for Cloudflare challenge, check for the desired class again
+                        #         element = wait_for_class(driver, desired_class)
+                        #         # time.sleep(10)
+
+
                         from selenium.webdriver.common.by import By
                         from selenium.webdriver.support.ui import WebDriverWait
                         from selenium.webdriver.support import expected_conditions as EC
 
-                        def check_cloudflare_and_solve(driver):
-                            try:
-                                # Wait for Cloudflare challenge to be visible
-                                for wait in range(5, 20, 5):
-                                    print('Cloudflare wait:', wait)
-                                    cloudflare_challenge = WebDriverWait(driver, 10).until(
-                                        EC.presence_of_element_located((By.ID, "cf-challenge-running"))
-                                    )
-                                    if cloudflare_challenge:
-                                        print("Cloudflare challenge detected, waiting for it to complete...")
-                                        time.sleep(wait)  # Adjust sleep time as necessary for the challenge to complete
-                                        return True
-                                    return False
-                            except Exception as exc:
-                                print("No Cloudflare challenge detected:", str(exc))
-                                return False
-
-                        def wait_for_class(driver, class_name):
-                            try:
-                                element = WebDriverWait(driver, 10).until(
-                                    EC.presence_of_element_located((By.CLASS_NAME, class_name))
-                                )
-                                return element
-                            except:
-                                return None
-
                         desired_class = 'job_result_wrapper'
-                        element = wait_for_class(driver, desired_class)
-                        # If the class is not present, check for Cloudflare challenge
-                        if not element:
-                            cloudflare_solved = check_cloudflare_and_solve(driver)
-                            if cloudflare_solved:
-                                # After waiting for Cloudflare challenge, check for the desired class again
-                                element = wait_for_class(driver, desired_class)
-                                # time.sleep(10)
-
-                                soup = BeautifulSoup(driver.page_source, "html.parser")
-                                try:
-                                    job_collection = soup.findAll("div", {"class": "job_result_wrapper"})
-                                    # job_collection = soup.findAll("div", {"class": "mb-12 flex flex-col gap-12"})
-                                    if len(job_collection) != 0:
-                                        jobs = self._get_jobs(job_collection)
-                                        self.save(runner=runner, jobs=jobs)
-                                    else:
-                                        driver.save_screenshot('./screenshot.png')
-                                        print('Screenshot Saved!')
-                                        break
-                                except Exception as exc:
-                                    print("Error in Get JOB Function", exc)
-                                    break
+                        element = WebDriverWait(driver, 10).until(
+                                EC.presence_of_element_located((By.CLASS_NAME, desired_class))
+                            )
+                        cloudflare_challenge = WebDriverWait(driver, 10).until(
+                                EC.presence_of_element_located((By.ID, "cf-challenge-running"))
+                            )
+                        if cloudflare_challenge:
+                            time.sleep(10)
+                        element = WebDriverWait(driver, 10).until(
+                                EC.presence_of_element_located((By.CLASS_NAME, desired_class))
+                            )
+                        soup = BeautifulSoup(driver.page_source, "html.parser")
+                        try:
+                            job_collection = soup.findAll("div", {"class": "job_result_wrapper"})
+                            # job_collection = soup.findAll("div", {"class": "mb-12 flex flex-col gap-12"})
+                            if len(job_collection) != 0:
+                                jobs = self._get_jobs(job_collection)
+                                self.save(runner=runner, jobs=jobs)
                             else:
-                                print('Cloudflare challeng failed!')
-                except:
-                    print("Error in Url")
+                                driver.save_screenshot('./screenshot.png')
+                                print('Screenshot Saved!')
+                                break
+                        except Exception as exc:
+                            print("Error in Get JOB Function", exc)
+                            break
+                    # else:
+                    #     print('Cloudflare challeng failed!')
+                except Exception as exc:
+                    print("Error in Url:", exc)
                     continue
         driver.quit()
 
